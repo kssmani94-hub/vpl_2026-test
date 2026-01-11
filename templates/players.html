@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    /* Admin Dashboard Container */
+    .admin-container {
+        max-width: 1250px;
+        margin: 30px auto;
+        background: #ffffff;
+        border-radius: 15px;
+        box-shadow: 0 10px 35px rgba(0,0,0,0.1);
+        padding: 30px;
+    }
+
+    /* Toolbar: Search and Export */
+    .toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 12px;
+        border-left: 6px solid var(--vpl-blue);
+    }
+
+    .search-box {
+        position: relative;
+        width: 350px;
+    }
+
+    .search-box input {
+        width: 100%;
+        padding: 12px 20px;
+        border-radius: 50px;
+        border: 2px solid #e2e8f0;
+        outline: none;
+        transition: 0.3s;
+    }
+
+    .search-box input:focus { border-color: var(--vpl-blue); }
+
+    .action-group { display: flex; gap: 12px; }
+
+    .btn-export {
+        background: #22c55e;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: 0.3s;
+    }
+
+    .btn-export:hover { background: #16a34a; transform: translateY(-2px); }
+
+    .btn-logout {
+        background: #ef4444;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 0.85rem;
+    }
+
+    /* Table Design */
+    .table-wrapper { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th {
+        background: var(--navy);
+        color: white;
+        text-align: left;
+        padding: 15px;
+        font-family: 'Oswald', sans-serif;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 1px;
+    }
+    td { padding: 15px; border-bottom: 1px solid #edf2f7; font-size: 0.95rem; color: #334155; }
+    tr:hover { background: #f1f5f9; }
+
+    /* Expandable Profile Section */
+    .detail-row { display: none; background: #fdfdfd; }
+    .profile-card {
+        padding: 40px;
+        display: flex;
+        gap: 40px;
+        border: 2px solid #e2e8f0;
+        border-top: none;
+        border-radius: 0 0 15px 15px;
+        background: linear-gradient(to right, #ffffff, #f8fbff);
+    }
+
+    .profile-photo {
+        width: 240px;
+        height: 320px;
+        object-fit: cover;
+        border-radius: 15px;
+        border: 5px solid white;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+    }
+
+    .details-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 25px;
+        flex: 1;
+    }
+
+    .info-group { border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; }
+    .info-group label {
+        display: block;
+        font-size: 0.65rem;
+        font-weight: 800;
+        color: var(--vpl-blue);
+        text-transform: uppercase;
+        margin-bottom: 4px;
+    }
+    .info-group span { font-weight: 600; color: var(--navy); font-size: 1rem; }
+
+    .btn-view {
+        background: var(--navy);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.75rem;
+        transition: 0.3s;
+    }
+    .btn-view:hover { background: var(--vpl-blue); }
+</style>
+
+<div class="admin-container">
+    <div class="toolbar">
+        <div class="search-box">
+            <input type="text" id="searchInput" onkeyup="filterPlayers()" placeholder="Search by Name or VPL ID...">
+        </div>
+        <div class="action-group">
+            <a href="{{ url_for('export_players') }}" class="btn-export">
+                <i class="fa-solid fa-file-excel"></i> EXPORT TO EXCEL
+            </a>
+            <a href="{{ url_for('logout') }}" class="btn-logout">LOGOUT</a>
+        </div>
+    </div>
+
+    <div class="table-wrapper">
+        <table id="playerTable">
+            <thead>
+                <tr>
+                    <th>VPL ID</th>
+                    <th>Full Name</th>
+                    <th>Role</th>
+                    <th>Primary Phone</th>
+                    <th>Jersey Name</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for player in players %}
+                <tr>
+                    <td style="font-weight: 800; color: var(--vpl-blue);">{{ player.vpl_id }}</td>
+                    <td style="font-weight: 600;">{{ player.full_name }}</td>
+                    <td><span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">{{ player.role }}</span></td>
+                    <td>{{ player.phone }}</td>
+                    <td>{{ player.shirt_name }} (#{{ player.shirt_number }})</td>
+                    <td>
+                        <button class="btn-view" onclick="toggleProfile('{{ player.vpl_id }}')">
+                            VIEW FULL PROFILE
+                        </button>
+                    </td>
+                </tr>
+                
+                <tr id="profile-{{ player.vpl_id }}" class="detail-row">
+                    <td colspan="6">
+                        <div class="profile-card">
+                            <img src="{{ url_for('static', filename='uploads/' + player.photo) }}" class="profile-photo" alt="Player Photo">
+                            
+                            <div class="details-grid">
+                                <div class="info-group"><label>Full Name</label><span>{{ player.full_name }}</span></div>
+                                <div class="info-group"><label>Age</label><span>{{ player.age }} Years</span></div>
+                                <div class="info-group"><label>Primary Phone</label><span>{{ player.phone }}</span></div>
+
+                                <div class="info-group"><label>CH Same Mobile?</label><span>{{ player.ch_reg_same }}</span></div>
+                                <div class="info-group"><label>CH Registered Mobile</label><span>{{ player.ch_mobile }}</span></div>
+                                <div class="info-group"><label>CH Profile Name</label><span>{{ player.ch_name }}</span></div>
+
+                                <div class="info-group"><label>Playing Style</label><span>{{ player.style }}</span></div>
+                                <div class="info-group"><label>Current Team</label><span>{{ player.current_team }}</span></div>
+                                <div class="info-group"><label>Previous VPL Team</label><span>{{ player.prev_team if player.prev_team else 'N/A' }}</span></div>
+
+                                <div class="info-group"><label>Jersey Name</label><span>{{ player.shirt_name }}</span></div>
+                                <div class="info-group"><label>Jersey Number</label><span>{{ player.shirt_number }}</span></div>
+                                <div class="info-group"><label>Size & Sleeves</label><span>{{ player.shirt_size }} ({{ player.sleeves }})</span></div>
+
+                                <div class="info-group" style="grid-column: span 3;">
+                                    <label>Player Comments / Notes</label>
+                                    <span>{{ player.comments if player.comments else 'No comments provided.' }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // Search Filter Logic
+    function filterPlayers() {
+        let input = document.getElementById("searchInput");
+        let filter = input.value.toUpperCase();
+        let table = document.getElementById("playerTable");
+        let tr = table.getElementsByTagName("tr");
+
+        for (let i = 1; i < tr.length; i++) {
+            // Only search primary rows, skip detail rows
+            if (!tr[i].classList.contains('detail-row')) {
+                let tdID = tr[i].getElementsByTagName("td")[0];
+                let tdName = tr[i].getElementsByTagName("td")[1];
+                if (tdID || tdName) {
+                    let idText = tdID.textContent || tdID.innerText;
+                    let nameText = tdName.textContent || tdName.innerText;
+                    if (idText.toUpperCase().indexOf(filter) > -1 || nameText.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                        // Close detail row if main row is hidden
+                        let nextRow = tr[i].nextElementSibling;
+                        if(nextRow && nextRow.classList.contains('detail-row')) {
+                            nextRow.style.display = "none";
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Expand/Collapse Profile Logic
+    function toggleProfile(vplId) {
+        let profileRow = document.getElementById('profile-' + vplId);
+        if (profileRow.style.display === "table-row") {
+            profileRow.style.display = "none";
+        } else {
+            // Close any other open profiles first for a clean look
+            document.querySelectorAll('.detail-row').forEach(row => row.style.display = 'none');
+            profileRow.style.display = "table-row";
+        }
+    }
+</script>
+{% endblock %}

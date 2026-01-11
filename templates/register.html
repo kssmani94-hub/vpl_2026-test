@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="vpl-card">
+    <div class="form-header">
+        <h2 style="font-family:'Oswald'; margin:0; font-size:2.5rem;">PLAYER REGISTRATION</h2>
+        <p style="opacity:0.8; font-size:0.9rem;">Vallalar Premier League 2026 Season 2</p>
+    </div>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for message in messages %}
+          <div style="background: #d4edda; color: #155724; padding: 15px; text-align: center; font-weight: bold; border-bottom: 2px solid #c3e6cb;">
+              {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form action="{{ url_for('register') }}" method="POST" enctype="multipart/form-data" class="form-body" id="regForm">
+        
+        <div>
+            <label><i class="fa fa-user"></i> Full Name</label>
+            <input type="text" name="full_name" placeholder="E.g. Sivasubramanian" required>
+        </div>
+        <div>
+            <label><i class="fa fa-calendar"></i> Age</label>
+            <input type="number" name="age" placeholder="Min 16+" required>
+        </div>
+        
+        <div>
+            <label><i class="fa fa-phone"></i> Primary Phone Number</label>
+            <input type="tel" id="primary_phone" name="phone" pattern="[0-9]{10}" title="Please enter exactly 10 digits" placeholder="9894982431" required oninput="syncCricNumber()">
+        </div>
+        
+        <div>
+            <label><i class="fa-brands fa-whatsapp"></i> Previously Entered phone number and cricheros register number is same?</label>
+            <div style="padding:10px 0;">
+                <input type="radio" name="ch_reg" value="Yes" id="ch_yes" onclick="toggleCricNumber()" style="width:auto;"> Yes
+                <input type="radio" name="ch_reg" value="No" id="ch_no" onclick="toggleCricNumber()" style="width:auto; margin-left:20px;" checked> No
+            </div>
+        </div>
+
+        <div>
+            <label><i class="fa fa-mobile-screen"></i> CricHeroes Number</label>
+            <input type="tel" name="ch_mobile" id="ch_mobile_field" pattern="[0-9]{10}" placeholder="Registered mobile" required>
+        </div>
+        
+        <div><label><i class="fa fa-id-badge"></i> Name on CricHeroes</label><input type="text" name="ch_name" placeholder="Exact profile name" required></div>
+
+        <div><label><i class="fa fa-users"></i> Current Regular Team</label><input type="text" name="current_team" required></div>
+        <div><label><i class="fa fa-history"></i> Previous Year VPL Team</label><input type="text" name="prev_team"></div>
+
+        <div><label><i class="fa fa-trophy"></i> Player Role</label>
+            <select name="role"><option>Batsman</option><option>Bowler</option><option>All-Rounder</option><option>Wicket-Keeper</option></select>
+        </div>
+        <div><label><i class="fa fa-baseball-bat-ball"></i> Batting/Bowling Style</label><input type="text" name="style" required></div>
+
+        <div class="full-width">
+            <label><i class="fa fa-camera"></i> Profile Photo (For Auction Card)</label>
+            <input type="file" name="photo" required>
+        </div>
+
+        <div><label><i class="fa fa-shirt"></i> Name on T-Shirt</label><input type="text" name="shirt_name" required></div>
+        <div><label><i class="fa fa-hashtag"></i> T-Shirt Number</label><input type="number" name="shirt_number" required></div>
+
+        <div><label><i class="fa fa-expand"></i> Size</label>
+            <select name="shirt_size"><option>S-36</option><option>M-38</option><option>L-40</option><option>XL-42</option><option>XXL-44</option></select>
+        </div>
+        <div>
+            <label><i class="fa fa-scissors"></i> Sleeves</label>
+            <div style="padding:10px 0;">
+                <input type="radio" name="sleeves" value="Half" style="width:auto;" checked> Half
+                <input type="radio" name="sleeves" value="Full" style="width:auto; margin-left:20px;"> Full (+Rs.50)
+            </div>
+        </div>
+
+        <div class="full-width payment-section">
+            <p style="margin:0; font-weight:bold; color:#856404;"><i class="fa fa-receipt"></i> Registration Fee: Rs. 500 | UPI: 9894982431</p>
+        </div>
+
+        <div class="full-width">
+            <input type="checkbox" required style="width:auto;"> I confirm I will follow all VPL Committee rules.
+        </div>
+
+        <div class="full-width"><button type="submit" class="btn-submit">Complete Registration</button></div>
+    </form>
+</div>
+
+<script>
+    function toggleCricNumber() {
+        var yesRadio = document.getElementById("ch_yes");
+        var primaryPhone = document.getElementById("primary_phone");
+        var mobileField = document.getElementById("ch_mobile_field");
+        
+        if (yesRadio.checked) {
+            // Set value to primary phone and disable
+            mobileField.value = primaryPhone.value;
+            mobileField.readOnly = true; // Use readOnly so value is still sent to server
+            mobileField.style.background = "#eeeeee";
+        } else {
+            mobileField.value = "";
+            mobileField.readOnly = false;
+            mobileField.style.background = "#fcfcfc";
+        }
+    }
+
+    function syncCricNumber() {
+        var yesRadio = document.getElementById("ch_yes");
+        var primaryPhone = document.getElementById("primary_phone");
+        var mobileField = document.getElementById("ch_mobile_field");
+        
+        // If "Yes" is already selected, keep numbers in sync while typing
+        if (yesRadio.checked) {
+            mobileField.value = primaryPhone.value;
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>VPL 2026 Season 2</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav>
+        <a href="{{ url_for('home') }}" class="nav-logo">
+            <img src="{{ url_for('static', filename='logo.png') }}" height="45"> VPL <span>2026</span>
+        </a>
+        <ul class="nav-links">
+            <li><a href="{{ url_for('home') }}">Home</a></li>
+            <li><a href="{{ url_for('register') }}">Register</a></li>
+            <li><a href="{{ url_for('players') }}">Players List</a></li>
+            <li><a href="{{ url_for('login') }}">Login</a></li>
+        </ul>
+    </nav>
+
+    <div class="main-wrapper">
+        {% block content %}{% endblock %}
+    </div>
+
+    <footer style="background: var(--navy); color: white; text-align: center; padding: 25px; font-size: 0.8rem; border-top: 4px solid var(--vpl-blue);">
+        &copy; 2026 Vallalar Premier League Season 2.
+    </footer>
+</body>
+</html>
